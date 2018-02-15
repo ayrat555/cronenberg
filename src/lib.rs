@@ -1,3 +1,6 @@
+extern crate chrono;
+extern crate nom;
+
 #[cfg(test)]
 mod tests {
     #[test]
