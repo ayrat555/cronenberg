@@ -1,4 +1,5 @@
 use std::num::ParseIntError;
+use std::str::FromStr;
 use nom;
 
 #[derive(Debug,PartialEq)]
@@ -11,14 +12,23 @@ pub struct CronItem {
     command: String
 }
 
-fn is_time_item(c: char) -> bool {
+fn is_time_char(c: char) -> bool {
     c == '*' || c.is_digit(10)
 }
 
-named!(alpha<&str, &str>, take_while!(is_time_item));
+fn to_time_item(c: &str) -> Result<Option<u8>, ParseIntError> {
+    if c == "*" { return Ok(None) }
 
-named!(time_item<&str, Vec<&str>>,
-       separated_list!(tag!(" "), alpha)
+    match u8::from_str_radix(c, 10) {
+        Ok(num) => Ok(Some(num)),
+        Err(er) => Err(er)
+    }
+}
+
+named!(time_item<&str, Option<u8>>, map_res!(take_while!(is_time_char), to_time_item));
+
+named!(time_items<&str, Vec<Option<u8>>>,
+       separated_list!(tag!(" "), time_item)
 );
 
 // named!(cron_item<&str, CronItem>,
@@ -59,16 +69,15 @@ named!(time_item<&str, Vec<&str>>,
 
 #[test]
 fn parse_numeric_time_item() {
-    assert_eq!(alpha("1 "), Ok((" ", "1")));
+    assert_eq!(time_item("1 "), Ok((" ", Some(1))));
 }
 
 #[test]
 fn parse_empty_time_item() {
-    assert_eq!(alpha("* "), Ok((" ", "*")));
+    assert_eq!(time_item("* "), Ok((" ", None)));
 }
 
 #[test]
 fn parse_list_time_items() {
-    println!("{:?}", alpha("* 1 2 *  "));
-    assert_eq!(time_item("* 1 2 *  "), Ok(("  ", vec!("*", "1", "2", "*"))));
+    assert_eq!(time_items("* 1 2 *  "), Ok(("  ", vec!(None, Some(1), Some(2), None))));
 }
