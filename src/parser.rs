@@ -1,22 +1,7 @@
 use std::num::ParseIntError;
-use self::TimeItem::*;
-
-#[derive(Debug,PartialEq)]
-pub enum TimeItem {
-    AllValues,
-    SingleValue(u8),
-    MultipleValues(Vec<u8>)
-}
-
-#[derive(Debug,PartialEq)]
-pub struct CronItem {
-    minute: TimeItem,
-    hour: TimeItem,
-    day_of_month: TimeItem,
-    month: TimeItem,
-    day_of_week: TimeItem,
-    command: String
-}
+use cron_item::TimeItem;
+use cron_item::TimeItem::*;
+use cron_item::CronItem;
 
 fn is_time_char(c: char) -> bool {
     c == '*' || c.is_digit(10)
