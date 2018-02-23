@@ -1,13 +1,20 @@
 use std::num::ParseIntError;
-use nom;
+use self::TimeItem::*;
+
+#[derive(Debug,PartialEq)]
+pub enum TimeItem {
+    AllValues,
+    SingleValue(u8),
+    MultipleValues(Vec<u8>)
+}
 
 #[derive(Debug,PartialEq)]
 pub struct CronItem {
-    minute: Option<u8>,
-    hour: Option<u8>,
-    day_of_month: Option<u8>,
-    month: Option<u8>,
-    day_of_week: Option<u8>,
+    minute: TimeItem,
+    hour: TimeItem,
+    day_of_month: TimeItem,
+    month: TimeItem,
+    day_of_week: TimeItem,
     command: String
 }
 
@@ -15,11 +22,11 @@ fn is_time_char(c: char) -> bool {
     c == '*' || c.is_digit(10)
 }
 
-fn to_time_item(c: &str) -> Result<Option<u8>, ParseIntError> {
-    if c == "*" { return Ok(None) }
+fn to_time_item(c: &str) -> Result<TimeItem, ParseIntError> {
+    if c == "*" { return Ok(AllValues) }
 
     match u8::from_str_radix(c, 10) {
-        Ok(num) => Ok(Some(num)),
+        Ok(num) => Ok(SingleValue(num)),
         Err(er) => Err(er)
     }
 }
@@ -29,9 +36,9 @@ fn is_new_line(c: char) -> bool {
 }
 
 
-named!(time_item<&str, Option<u8>>, map_res!(take_while!(is_time_char), to_time_item));
+named!(time_item<&str, TimeItem>, map_res!(take_while!(is_time_char), to_time_item));
 
-named!(time_items<&str, Vec<Option<u8>>>,
+named!(time_items<&str, Vec<TimeItem>>,
        separated_list!(tag!(" "), time_item)
 );
 
@@ -63,17 +70,17 @@ named!(cron_item<&str, CronItem>,
 
 #[test]
 fn parse_numeric_time_item() {
-    assert_eq!(time_item("1 "), Ok((" ", Some(1))));
+    assert_eq!(time_item("1 "), Ok((" ", SingleValue(1))));
 }
 
 #[test]
 fn parse_empty_time_item() {
-    assert_eq!(time_item("* "), Ok((" ", None)));
+    assert_eq!(time_item("* "), Ok((" ", AllValues)));
 }
 
 #[test]
 fn parse_list_time_items() {
-    assert_eq!(time_items("* 1 2 *  "), Ok(("  ", vec!(None, Some(1), Some(2), None))));
+    assert_eq!(time_items("* 1 2 *  "), Ok(("  ", vec!(AllValues, SingleValue(1), SingleValue(2), AllValues))));
 }
 
 #[test]
@@ -81,11 +88,11 @@ fn parse_cron_item() {
     assert_eq!(cron_item("* 1 * 2 * ls\n"),
                Ok(("\n",
                    CronItem {
-                       minute: None,
-                       hour: Some(1),
-                       day_of_month: None,
-                       month:  Some(2),
-                       day_of_week: None,
+                       minute: AllValues,
+                       hour: SingleValue(1),
+                       day_of_month: AllValues,
+                       month:  SingleValue(2),
+                       day_of_week: AllValues,
                        command: String::from("ls")
                    }
                ))
