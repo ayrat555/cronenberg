@@ -2,7 +2,8 @@
 pub enum TimeItem {
     AllValues,
     SingleValue(u8),
-    MultipleValues(Vec<u8>)
+    MultipleValues(Vec<u8>),
+    Interval((u8, u8))
 }
 
 #[derive(Debug,PartialEq)]
