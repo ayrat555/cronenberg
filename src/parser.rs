@@ -4,10 +4,6 @@ use cron_item::TimeItem::*;
 use cron_item::CronItem;
 use nom;
 
-fn is_end_of_line(c: char) -> bool {
-    c == '\n'
-}
-
 fn is_digit(c: char) -> bool {
     c.is_digit(10)
 }
@@ -24,7 +20,14 @@ fn to_number(c: &str) -> Result<u8, ParseIntError> {
 
 named!(number<&str, u8>, map_res!(take_while!(is_digit), to_number));
 
-named!(command<&str, &str>, take_till!(is_end_of_line));
+named!(command<&str, &str>,
+       do_parse!(
+           com: take_until!("command_end") >>
+           tag!("command_end")             >>
+           (com)
+       )
+);
+
 
 named!(time_interval<&str, TimeItem>,
        do_parse!(
@@ -129,8 +132,8 @@ mod test {
 
     #[test]
     fn parse_cron_item() {
-        assert_eq!(cron_item("* 1-5 * 2,5,6 5 ls\n"),
-                   Ok(("\n",
+        assert_eq!(cron_item("* 1-5 * 2,5,6 5 lscommand_end"),
+                   Ok(("",
                        CronItem {
                            minute: AllValues,
                            hour: Interval((1, 5)),
@@ -138,6 +141,22 @@ mod test {
                            month:  MultipleValues(vec!(2, 5, 6)),
                            day_of_week: SingleValue(5),
                            command: String::from("ls")
+                       }
+                   ))
+        );
+    }
+
+    #[test]
+    fn parse_cron_item_with_multiword_command() {
+        assert_eq!(cron_item("* 1-5 * 2,5,6 5 /bin/kill_me_please --now command_end"),
+                   Ok(("",
+                       CronItem {
+                           minute: AllValues,
+                           hour: Interval((1, 5)),
+                           day_of_month: AllValues,
+                           month:  MultipleValues(vec!(2, 5, 6)),
+                           day_of_week: SingleValue(5),
+                           command: String::from("/bin/kill_me_please --now ")
                        }
                    ))
         );
