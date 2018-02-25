@@ -2,8 +2,9 @@ use std::num::ParseIntError;
 use cron_item::TimeItem;
 use cron_item::TimeItem::*;
 use cron_item::CronItem;
+use nom;
 
-fn is_new_line(c: char) -> bool {
+fn is_end_of_line(c: char) -> bool {
     c == '\n'
 }
 
@@ -11,19 +12,26 @@ fn is_digit(c: char) -> bool {
     c.is_digit(10)
 }
 
+fn is_space(c: char) -> bool {
+    nom::is_space(c as u8)
+}
+
+named!(spaces<&str, &str>, take_while!(is_space));
+
 fn to_number(c: &str) -> Result<u8, ParseIntError> {
     u8::from_str_radix(c, 10)
 }
+
 named!(number<&str, u8>, map_res!(take_while!(is_digit), to_number));
 
-named!(command<&str, &str>, take_till!(is_new_line));
+named!(command<&str, &str>, take_till!(is_end_of_line));
 
 named!(time_interval<&str, TimeItem>,
        do_parse!(
            start: number >>
            tag!("-")     >>
            end:   number >>
-           is_a!(" ")    >>
+           spaces        >>
            (Interval((start, end)))
        )
 );
@@ -31,7 +39,7 @@ named!(time_interval<&str, TimeItem>,
 named!(multiple_time_values<&str, TimeItem>,
        do_parse!(
            values: separated_list!(tag!(","), number) >>
-           is_a!(" ")                                 >>
+           spaces                                     >>
            (MultipleValues(values))
        )
 );
@@ -40,6 +48,7 @@ named!(single_time_value<&str, TimeItem>,
        do_parse!(
            number: number >>
            is_a!(" ")     >>
+           spaces         >>
            (SingleValue(number))
        )
 );
@@ -47,13 +56,13 @@ named!(single_time_value<&str, TimeItem>,
 named!(all_time_values<&str, TimeItem>,
        do_parse!(
            tag!("*")  >>
-           is_a!(" ") >>
+           spaces     >>
            (AllValues)
        )
 );
 
 named!(time_item<&str, TimeItem>,
-       alt!(time_interval | single_time_value | all_time_values | multiple_time_values)
+       alt!(time_interval |  single_time_value | all_time_values | multiple_time_values)
 );
 
 named!(cron_item<&str, CronItem>,
@@ -77,42 +86,42 @@ named!(cron_item<&str, CronItem>,
 
 #[test]
 fn parse_time_iterval() {
-    assert_eq!(time_interval("1-100 "), Ok(("", Interval((1, 100)))));
+    assert_eq!(time_interval("1-100 1"), Ok(("1", Interval((1, 100)))));
 }
 
 #[test]
 fn parse_multiple_time_values() {
-    assert_eq!(multiple_time_values("1,5,25 "), Ok(("", MultipleValues(vec!(1, 5, 25)))));
+    assert_eq!(multiple_time_values("1,5,25 1"), Ok(("1", MultipleValues(vec!(1, 5, 25)))));
 }
 
 #[test]
 fn parse_single_time_value() {
-    assert_eq!(single_time_value("55 "), Ok(("", SingleValue(55))));
+    assert_eq!(single_time_value("55   1"), Ok(("1", SingleValue(55))));
 }
 
 #[test]
 fn parse_all_values() {
-    assert_eq!(all_time_values("* "), Ok(("", AllValues)));
+    assert_eq!(all_time_values("*     55"), Ok(("55", AllValues)));
 }
 
 #[test]
 fn parse_time_item_as_interval() {
-    assert_eq!(time_item("1-100 "), Ok(("", Interval((1, 100)))));
+   assert_eq!(time_item("1-100  0"), Ok(("0", Interval((1, 100)))));
 }
 
 #[test]
 fn parse_time_item_as_multiple_values() {
-    assert_eq!(time_item("1,5,25 "), Ok(("", MultipleValues(vec!(1, 5, 25)))));
+    assert_eq!(time_item("1,5,25   9"), Ok(("9", MultipleValues(vec!(1, 5, 25)))));
 }
 
 #[test]
 fn parse_time_item_as_single_value() {
-    assert_eq!(time_item("1 "), Ok(("", SingleValue(1))));
+    assert_eq!(time_item("1  sad"), Ok(("sad", SingleValue(1))));
 }
 
 #[test]
 fn parse_time_item_as_all_values() {
-    assert_eq!(time_item("* "), Ok(("", AllValues)));
+    assert_eq!(time_item("*  wanna die"), Ok(("wanna die", AllValues)));
 }
 
 #[test]
