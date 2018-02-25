@@ -84,58 +84,62 @@ named!(cron_item<&str, CronItem>,
        )
 );
 
-#[test]
-fn parse_time_iterval() {
-    assert_eq!(time_interval("1-100 1"), Ok(("1", Interval((1, 100)))));
-}
+mod test {
+    use super::*;
 
-#[test]
-fn parse_multiple_time_values() {
-    assert_eq!(multiple_time_values("1,5,25 1"), Ok(("1", MultipleValues(vec!(1, 5, 25)))));
-}
+    #[test]
+    fn parse_time_iterval() {
+        assert_eq!(time_interval("1-100 1"), Ok(("1", Interval((1, 100)))));
+    }
 
-#[test]
-fn parse_single_time_value() {
-    assert_eq!(single_time_value("55   1"), Ok(("1", SingleValue(55))));
-}
+    #[test]
+    fn parse_multiple_time_values() {
+        assert_eq!(multiple_time_values("1,5,25 1"), Ok(("1", MultipleValues(vec!(1, 5, 25)))));
+    }
 
-#[test]
-fn parse_all_values() {
-    assert_eq!(all_time_values("*     55"), Ok(("55", AllValues)));
-}
+    #[test]
+    fn parse_single_time_value() {
+        assert_eq!(single_time_value("55   1"), Ok(("1", SingleValue(55))));
+    }
 
-#[test]
-fn parse_time_item_as_interval() {
-   assert_eq!(time_item("1-100  0"), Ok(("0", Interval((1, 100)))));
-}
+    #[test]
+    fn parse_all_values() {
+        assert_eq!(all_time_values("*     55"), Ok(("55", AllValues)));
+    }
 
-#[test]
-fn parse_time_item_as_multiple_values() {
-    assert_eq!(time_item("1,5,25   9"), Ok(("9", MultipleValues(vec!(1, 5, 25)))));
-}
+    #[test]
+    fn parse_time_item_as_interval() {
+        assert_eq!(time_item("1-100  0"), Ok(("0", Interval((1, 100)))));
+    }
 
-#[test]
-fn parse_time_item_as_single_value() {
-    assert_eq!(time_item("1  sad"), Ok(("sad", SingleValue(1))));
-}
+    #[test]
+    fn parse_time_item_as_multiple_values() {
+        assert_eq!(time_item("1,5,25   9"), Ok(("9", MultipleValues(vec!(1, 5, 25)))));
+    }
 
-#[test]
-fn parse_time_item_as_all_values() {
-    assert_eq!(time_item("*  wanna die"), Ok(("wanna die", AllValues)));
-}
+    #[test]
+    fn parse_time_item_as_single_value() {
+        assert_eq!(time_item("1  sad"), Ok(("sad", SingleValue(1))));
+    }
 
-#[test]
-fn parse_cron_item() {
-    assert_eq!(cron_item("* 1-5 * 2,5,6 5 ls\n"),
-               Ok(("\n",
-                   CronItem {
-                       minute: AllValues,
-                       hour: Interval((1, 5)),
-                       day_of_month: AllValues,
-                       month:  MultipleValues(vec!(2, 5, 6)),
-                       day_of_week: SingleValue(5),
-                       command: String::from("ls")
-                   }
-               ))
-    );
+    #[test]
+    fn parse_time_item_as_all_values() {
+        assert_eq!(time_item("*  wanna die"), Ok(("wanna die", AllValues)));
+    }
+
+    #[test]
+    fn parse_cron_item() {
+        assert_eq!(cron_item("* 1-5 * 2,5,6 5 ls\n"),
+                   Ok(("\n",
+                       CronItem {
+                           minute: AllValues,
+                           hour: Interval((1, 5)),
+                           day_of_month: AllValues,
+                           month:  MultipleValues(vec!(2, 5, 6)),
+                           day_of_week: SingleValue(5),
+                           command: String::from("ls")
+                       }
+                   ))
+        );
+    }
 }
