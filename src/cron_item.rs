@@ -1,4 +1,8 @@
 use std::str::FromStr;
+use std::fmt;
+use std::fmt::Display;
+use std::fmt::Formatter;
+use std::str;
 use parser::parse_cron_item;
 
 #[derive(Debug,PartialEq)]
@@ -24,6 +28,23 @@ impl FromStr for CronItem {
 
     fn from_str(s: &str) -> Result<Self, ()> {
         parse_cron_item(s)
+    }
+}
+
+impl Display for TimeItem {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        match self {
+            &TimeItem::AllValues              => write!(f, "*"),
+            &TimeItem::Interval((start, end)) => write!(f, "{}-{}", start, end),
+            &TimeItem::MultipleValues(ref values) =>  {
+                let result = values.iter()
+                    .map(|val| val.to_string().as_str())
+                    .collect::<Vec<&str>>().join(",");
+
+                write!(f, "{}", result)
+            }
+            &TimeItem::SingleValue(value)     => write!(f, "{}", value)
+        }
     }
 }
 
