@@ -4,6 +4,8 @@ use cron_item::TimeItem::*;
 use cron_item::CronItem;
 use nom;
 
+static COMMAND_TERMINATOR: &'static str = "command_end";
+
 fn is_digit(c: char) -> bool {
     c.is_digit(10)
 }
@@ -22,12 +24,11 @@ named!(number<&str, u8>, map_res!(take_while!(is_digit), to_number));
 
 named!(command<&str, &str>,
        do_parse!(
-           com: take_until!("command_end") >>
-           tag!("command_end")             >>
+           com: take_until!(COMMAND_TERMINATOR) >>
+           tag!(COMMAND_TERMINATOR)             >>
            (com)
        )
 );
-
 
 named!(time_interval<&str, TimeItem>,
        do_parse!(
@@ -86,6 +87,15 @@ named!(cron_item<&str, CronItem>,
                })
        )
 );
+
+pub fn parse_cron_item(s: &str) -> Result<CronItem, ()> {
+    let s_with_term = &format!("{}{}", s, COMMAND_TERMINATOR);
+
+    match cron_item(s_with_term) {
+        Ok((_, cron_item)) => Ok(cron_item),
+        Err(_)             => Err(())
+    }
+}
 
 mod test {
     use super::*;

@@ -1,3 +1,6 @@
+use std::str::FromStr;
+use parser::parse_cron_item;
+
 #[derive(Debug,PartialEq)]
 pub enum TimeItem {
     AllValues,
@@ -14,4 +17,34 @@ pub struct CronItem {
     pub month: TimeItem,
     pub day_of_week: TimeItem,
     pub command: String
+}
+
+impl FromStr for CronItem {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, ()> {
+        parse_cron_item(s)
+    }
+}
+
+mod test {
+    use super::CronItem;
+    use super::TimeItem::*;
+    use std::str::FromStr;
+
+    #[test]
+    fn create_cron_item_from_str() {
+        let s = "* * 5-7 1,2,5 8 sudo rm -rf /";
+
+        assert_eq!(CronItem::from_str(s).unwrap(),
+                   CronItem {
+                       minute: AllValues,
+                       hour:   AllValues,
+                       day_of_month: Interval((5,7)),
+                       month: MultipleValues(vec!(1,2,5)),
+                       day_of_week: SingleValue(8),
+                       command: String::from("sudo rm -rf /")
+                   }
+        );
+    }
 }
