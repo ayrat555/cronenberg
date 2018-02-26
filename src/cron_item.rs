@@ -4,6 +4,7 @@ use std::fmt::Display;
 use std::fmt::Formatter;
 use std::str;
 use parser::parse_cron_item;
+use parser::ParserError;
 
 #[derive(Debug,PartialEq)]
 pub enum TimeItem {
@@ -24,9 +25,9 @@ pub struct CronItem {
 }
 
 impl FromStr for CronItem {
-    type Err = ();
+    type Err = ParserError;
 
-    fn from_str(s: &str) -> Result<Self, ()> {
+    fn from_str(s: &str) -> Result<Self, ParserError> {
         parse_cron_item(s)
     }
 }

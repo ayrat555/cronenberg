@@ -6,6 +6,11 @@ use nom;
 
 static COMMAND_TERMINATOR: &'static str = "command_end";
 
+#[derive(Debug,PartialEq)]
+pub struct ParserError {
+    message: String
+}
+
 fn is_digit(c: char) -> bool {
     c.is_digit(10)
 }
@@ -88,12 +93,12 @@ named!(cron_item<&str, CronItem>,
        )
 );
 
-pub fn parse_cron_item(s: &str) -> Result<CronItem, ()> {
+pub fn parse_cron_item(s: &str) -> Result<CronItem, ParserError> {
     let s_with_term = &format!("{}{}", s, COMMAND_TERMINATOR);
 
     match cron_item(s_with_term) {
         Ok((_, cron_item)) => Ok(cron_item),
-        Err(_)             => Err(())
+        Err(_)             => Err(ParserError{ message: String::from("Coundn't parse cron item") })
     }
 }
 
