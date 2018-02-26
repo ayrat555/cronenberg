@@ -6,9 +6,9 @@ use nom;
 
 static COMMAND_TERMINATOR: &'static str = "command_end";
 
-#[derive(Debug,PartialEq)]
+#[derive(Debug, PartialEq)]
 pub struct ParserError {
-    message: String
+    message: String,
 }
 
 fn is_digit(c: char) -> bool {
@@ -98,7 +98,9 @@ pub fn parse_cron_item(s: &str) -> Result<CronItem, ParserError> {
 
     match cron_item(s_with_term) {
         Ok((_, cron_item)) => Ok(cron_item),
-        Err(_)             => Err(ParserError{ message: String::from("Coundn't parse cron item") })
+        Err(_) => Err(ParserError {
+            message: String::from("Coundn't parse cron item"),
+        }),
     }
 }
 
@@ -112,7 +114,10 @@ mod test {
 
     #[test]
     fn parse_multiple_time_values() {
-        assert_eq!(multiple_time_values("1,5,25 1"), Ok(("1", MultipleValues(vec!(1, 5, 25)))));
+        assert_eq!(
+            multiple_time_values("1,5,25 1"),
+            Ok(("1", MultipleValues(vec![1, 5, 25])))
+        );
     }
 
     #[test]
@@ -132,7 +137,10 @@ mod test {
 
     #[test]
     fn parse_time_item_as_multiple_values() {
-        assert_eq!(time_item("1,5,25   9"), Ok(("9", MultipleValues(vec!(1, 5, 25)))));
+        assert_eq!(
+            time_item("1,5,25   9"),
+            Ok(("9", MultipleValues(vec![1, 5, 25])))
+        );
     }
 
     #[test]
@@ -147,33 +155,37 @@ mod test {
 
     #[test]
     fn parse_cron_item() {
-        assert_eq!(cron_item("* 1-5 * 2,5,6 5 lscommand_end"),
-                   Ok(("",
-                       CronItem {
-                           minute: AllValues,
-                           hour: Interval((1, 5)),
-                           day_of_month: AllValues,
-                           month:  MultipleValues(vec!(2, 5, 6)),
-                           day_of_week: SingleValue(5),
-                           command: String::from("ls")
-                       }
-                   ))
+        assert_eq!(
+            cron_item("* 1-5 * 2,5,6 5 lscommand_end"),
+            Ok((
+                "",
+                CronItem {
+                    minute: AllValues,
+                    hour: Interval((1, 5)),
+                    day_of_month: AllValues,
+                    month: MultipleValues(vec![2, 5, 6]),
+                    day_of_week: SingleValue(5),
+                    command: String::from("ls"),
+                }
+            ))
         );
     }
 
     #[test]
     fn parse_cron_item_with_multiword_command() {
-        assert_eq!(cron_item("* 1-5 * 2,5,6 5 /bin/kill_me_please --now command_end"),
-                   Ok(("",
-                       CronItem {
-                           minute: AllValues,
-                           hour: Interval((1, 5)),
-                           day_of_month: AllValues,
-                           month:  MultipleValues(vec!(2, 5, 6)),
-                           day_of_week: SingleValue(5),
-                           command: String::from("/bin/kill_me_please --now ")
-                       }
-                   ))
+        assert_eq!(
+            cron_item("* 1-5 * 2,5,6 5 /bin/kill_me_please --now command_end"),
+            Ok((
+                "",
+                CronItem {
+                    minute: AllValues,
+                    hour: Interval((1, 5)),
+                    day_of_month: AllValues,
+                    month: MultipleValues(vec![2, 5, 6]),
+                    day_of_week: SingleValue(5),
+                    command: String::from("/bin/kill_me_please --now "),
+                }
+            ))
         );
     }
 }
