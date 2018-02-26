@@ -14,6 +14,8 @@ extern crate cronenberg;
 
 use cronenberg::CronItem;
 use cronenberg::TimeItem::*;
+use std::str::FromStr;
+use std::string::ToString;
 
 let s = "* * 5-7 1,2,5 8 sudo rm -rf /";
 assert_eq!(
