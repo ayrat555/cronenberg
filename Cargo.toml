@@ -5,4 +5,3 @@ authors = ["Ayrat Badykov <ayratin555@gmail.com>"]
 
 [dependencies]
 nom = "4.0.0-alpha2"
-chrono = "0.4"
