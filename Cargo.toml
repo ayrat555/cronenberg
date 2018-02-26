@@ -2,6 +2,9 @@
 name = "cronenberg"
 version = "0.1.0"
 authors = ["Ayrat Badykov <ayratin555@gmail.com>"]
+description = "Simple cron command entry parser."
+license = "MIT"
+repository = "https://github.com/ayrat555/cronenberg"
 
 [dependencies]
 nom = "4.0.0-alpha2"
