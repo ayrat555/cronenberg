@@ -7,13 +7,28 @@
 * `TimeItem`: An enum that represents cron command time or date field
 * `CronItem`: A struct that represents cron command entry, for example, `* * 5-7 1,2,5 8 sudo rm -rf /`
 
+## Installation
+
+`cronenberg` is available on [crates.io](https://crates.io/crates/cronenberg) and can be included in your Cargo enabled project like this:
+
+```toml
+[dependencies]
+cronenberg = "0.2.0"
+```
+
+Then include it in your code like this:
+
+```rust
+extern crate cronenberg;
+```
+
 ## Example
 
 ```rust
 extern crate cronenberg;
 
-use cronenberg::CronItem;
-use cronenberg::TimeItem::*;
+use cronenberg::cron_item::CronItem;
+use cronenberg::cron_item::TimeItem::*;
 use std::str::FromStr;
 use std::string::ToString;
 
