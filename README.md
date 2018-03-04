@@ -32,7 +32,7 @@ use cronenberg::cron_item::TimeItem::*;
 use std::str::FromStr;
 use std::string::ToString;
 
-let s = "* * 5-7 1,2,5 8 sudo rm -rf /";
+let s = "* * 5-7 1,2,5 8 ls -la";
 assert_eq!(
     CronItem::from_str(s).unwrap(),
     CronItem {
@@ -41,7 +41,7 @@ assert_eq!(
         day_of_month: Interval((5, 7)),
         month: MultipleValues(vec![1, 2, 5]),
         day_of_week: SingleValue(8),
-        command: String::from("sudo rm -rf /"),
+        command: String::from("ls -la"),
     }
 );
 
@@ -51,9 +51,9 @@ let cron_item = CronItem {
     day_of_month: Interval((1, 11)),
     month: MultipleValues(vec![1, 2, 5]),
     day_of_week: AllValues,
-    command: String::from("sudo rm -rf /"),
+    command: String::from("pwd"),
 };
-assert_eq!("1,10 1-4 1-11 1,2,5 * sudo rm -rf /", cron_item.to_string());
+assert_eq!("1,10 1-4 1-11 1,2,5 * pwd", cron_item.to_string());
 ```
 
 ## Contributing
