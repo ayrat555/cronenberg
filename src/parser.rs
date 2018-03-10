@@ -8,7 +8,7 @@ static COMMAND_TERMINATOR: &'static str = "command_end";
 
 #[derive(Debug, PartialEq)]
 pub struct ParserError {
-    message: String,
+    pub message: String,
 }
 
 fn is_digit(c: char) -> bool {
@@ -47,8 +47,8 @@ named!(time_interval<&str, TimeItem>,
 
 named!(multiple_time_values<&str, TimeItem>,
        do_parse!(
-           values: separated_list!(tag!(","), number) >>
-           spaces                                     >>
+           values: separated_nonempty_list!(tag!(","), number) >>
+           spaces                                              >>
            (MultipleValues(values))
        )
 );
