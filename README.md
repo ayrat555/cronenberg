@@ -13,7 +13,7 @@
 
 ```toml
 [dependencies]
-cronenberg = "0.2.0"
+cronenberg = "0.3.0"
 ```
 
 Then include it in your code like this:
@@ -27,8 +27,8 @@ extern crate cronenberg;
 ```rust
 extern crate cronenberg;
 
-use cronenberg::cron_item::CronItem;
-use cronenberg::cron_item::TimeItem::*;
+use cronenberg::CronItem;
+use cronenberg::TimeItem::*;
 use std::str::FromStr;
 use std::string::ToString;
 
