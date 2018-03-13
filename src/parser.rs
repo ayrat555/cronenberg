@@ -83,11 +83,11 @@ named!(cron_item<&str, CronItem>,
                day_of_week:     time_item >>
                command:         command   >>
                (CronItem {
-                   minute: minute,
-                   hour: hour,
-                   day_of_month: day_of_month,
-                   month: month,
-                   day_of_week: day_of_week,
+                   minute,
+                   hour,
+                   day_of_month,
+                   month,
+                   day_of_week,
                    command: String::from(command)
                })
        )

@@ -34,10 +34,10 @@ impl FromStr for CronItem {
 
 impl Display for TimeItem {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        match self {
-            &TimeItem::AllValues => write!(f, "*"),
-            &TimeItem::Interval((start, end)) => write!(f, "{}-{}", start, end),
-            &TimeItem::MultipleValues(ref values) => {
+        match *self {
+            TimeItem::AllValues => write!(f, "*"),
+            TimeItem::Interval((start, end)) => write!(f, "{}-{}", start, end),
+            TimeItem::MultipleValues(ref values) => {
                 let result = values.iter().map(|val| val.to_string()).fold(
                     String::from(""),
                     |mut acc, val| {
@@ -50,7 +50,7 @@ impl Display for TimeItem {
 
                 write!(f, "{}", &result[0..result.len() - 1])
             }
-            &TimeItem::SingleValue(value) => write!(f, "{}", value),
+            TimeItem::SingleValue(value) => write!(f, "{}", value),
         }
     }
 }
